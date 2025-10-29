@@ -1,0 +1,34 @@
+{
+  "name": "oauth0-js-lib",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "@types/qrcode": "^1.5.6",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.1",
+    "vite-plugin-dts": "^4.5.4"
+  },
+  "dependencies": {
+    "-": "^0.0.1",
+    "@vitest/coverage-v8": "^4.0.4",
+    "axios": "^1.13.1",
+    "qrcode": "^1.5.4",
+    "vitest": "^4.0.4"
+  }
+}
