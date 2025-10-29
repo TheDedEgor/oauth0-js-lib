@@ -6,17 +6,16 @@
   "module": "./dist/index.es.js",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "vite build"
   },
   "keywords": [],
-  "author": "",
+  "author": "Egor Korepin",
   "license": "ISC",
-  "description": "",
+  "description": "Simplify integration with the Oauth0 service",
   "devDependencies": {
     "@types/node": "^24.9.1",
     "@types/qrcode": "^1.5.6",
