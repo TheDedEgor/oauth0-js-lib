@@ -1,70 +1,76 @@
 import axios from "axios";
-import QRCode, { type QRCodeRenderersOptions } from "qrcode";
-import { getConfig } from "./config.js";
+import styles from './style.css?raw';
+import {getConfig} from "./config.js";
+import {QRModal} from "./modal.js";
 
-export interface ServiceInfo {
-    authUrl: string;
-    serviceName: string;
-    description?: string;
-    logoUrl?: string;
-    permanent?: boolean;
-    lifetimeSeconds?: number;
+export interface AuthSessionTime {
+    lifetimeSeconds?: number
 }
 
-export interface QrOptions {
-    width?: number;
-    height?: number;
-    margin?: number;
-    errorCorrectionLevel?: string;
+export interface AuthSession {
+    links: {
+        link: string
+        type: string
+    }[]
+    sessionId: string
+    validUntil: string | null
 }
+
+injectStyles();
 
 const config = getConfig();
 
-const defaultQrOptions: QRCodeRenderersOptions = {
-    width: 300,
-    margin: 2,
-    errorCorrectionLevel: "H",
-};
-
 const api = axios.create({
-    baseURL: config.serviceUrl,
+    baseURL: config.baseUrl,
 });
 
-async function createSession(data: ServiceInfo): Promise<string> {
-    const response = await api.post<string>("/session/create", data);
+const modalInstance = new QRModal();
+
+export function showQrLogin(data: string, sessionTime: AuthSessionTime = {}) {
+    modalInstance.show(sessionTime);
+}
+
+export function closeQrLogin(): void {
+    modalInstance.close();
+}
+
+export async function createAuthSession(sessionTime: AuthSessionTime = {}) {
+    const response = await api.post<AuthSession>(config.createEndpoint, sessionTime, {
+        withCredentials: true
+    });
     return response.data;
 }
 
-/**
- * Создает авторизационную сессию и возвращает ссылку авторизации для пользователя
- * @param serviceInfo информация о сервисе в который нужно авторизоваться
- * @returns авторизационная ссылка в Tg-бота
- */
-export async function createAuthUrl(serviceInfo: ServiceInfo): Promise<string> {
-    const sessionToken = await createSession(serviceInfo);
-    return config.botUrl + "?start=" + sessionToken;
+export function createAuthEvent(successCallback: Function = () => modalInstance.close(), errorCallback: Function = () => {}) {
+    const url = new URL(config.authEventEndpoint, config.baseUrl);
+    const eventSource = new EventSource(url, {
+        withCredentials: true
+    });
+    eventSource.addEventListener('auth-success', async (e) => {
+        try {
+            await api.post(config.authConfirmEndpoint, null, {
+                withCredentials: true
+            });
+            successCallback();
+        } catch (err) {
+            console.error(err);
+            errorCallback(err);
+        } finally {
+            eventSource.close();
+        }
+    });
+    eventSource.onerror = (e) => {
+        console.error("EventSource failed:", e);
+        eventSource.close();
+    };
+    return eventSource;
 }
 
-/**
- * Создает авторизационную сессию, а затем создает QrCode со ссылкой в WebApp Telegram для прохождения авторизация по id <canvas> в html-документе
- * @param serviceInfo информация о сервисе в который нужно авторизоваться
- * @param canvasElementId id html-элемента <canvas> в разметке
- * @param userQrOptions опции для генерации QrCode
- */
-export async function createAuthQrCode(
-    serviceInfo: ServiceInfo,
-    canvasElementId: string,
-    userQrOptions: QRCodeRenderersOptions = {}
-) {
-    if (!config.webAppDirectLink) {
-        throw "Not found 'webAppDirectLink' in config";
-    }
-    const canvasElement = document.getElementById(canvasElementId);
-    if (!canvasElement) {
-        throw "Not found canvas element";
-    }
-    const sessionToken = await createSession(serviceInfo);
-    const text = config.botUrl + "/" + config.webAppDirectLink + "?startapp=" + sessionToken;
-    const qrOptions = { ...defaultQrOptions, ...userQrOptions };
-    QRCode.toCanvas(canvasElement, text, qrOptions);
+function injectStyles() {
+    if (document.getElementById('oauth0-js-lib-styles')) return;
+
+    const styleElement = document.createElement('style');
+    styleElement.id = 'oauth0-js-lib-styles';
+    styleElement.innerHTML = styles;
+    document.head.appendChild(styleElement);
 }

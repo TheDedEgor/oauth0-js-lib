@@ -22,14 +22,15 @@ export default defineConfig({
             fileName: (format) => `index.${format}.js`,
             formats: ["es", "umd"],
         },
-        rollupOptions: {
-            external: ["axios", "qrcode"],
-            output: {
-                globals: {
-                    axios: "axios",
-                    qrcode: "QRCode",
-                },
-            },
-        },
+        // TODO пока что временно отключено исключение зависимостей из сборки
+        // rollupOptions: {
+        //     external: ["axios", "qrcode"],
+        //     output: {
+        //         globals: {
+        //             axios: "axios",
+        //             qrcode: "QRCode",
+        //         },
+        //     },
+        // },
     },
 });

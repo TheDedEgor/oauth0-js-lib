@@ -1,13 +1,15 @@
 export interface OauthConfig {
-    serviceUrl: string;
-    botUrl: string;
-    webAppDirectLink?: string;
+    baseUrl: string;
+    createEndpoint: string;
+    authEventEndpoint: string;
+    authConfirmEndpoint: string;
 }
 
 const defaultConfig: OauthConfig = {
-    serviceUrl: "https://oauth0.site",
-    botUrl: "https://t.me/OAuthZeroBot",
-    webAppDirectLink: "web",
+    baseUrl: "",
+    createEndpoint: "/api/oauth0/create",
+    authEventEndpoint: "/api/oauth0/auth-events",
+    authConfirmEndpoint: "/api/oauth0/auth-confirm"
 };
 
 // Проверяем define-конфиг (для Vite/Webpack)
@@ -28,7 +30,7 @@ let currentConfig: OauthConfig = {
 };
 
 export function setConfig(newConfig: OauthConfig) {
-    currentConfig = { ...currentConfig, ...newConfig };
+    currentConfig = {...currentConfig, ...newConfig};
 }
 
 export function getConfig() {

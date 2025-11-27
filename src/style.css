@@ -1,0 +1,169 @@
+.oauth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding: 0;
+}
+
+.oauth-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.oauth-modal-content {
+    background: white;
+    text-align: center;
+    position: relative;
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 35px 20px 20px 20px; /* Возвращаем исходный padding */
+    box-sizing: border-box;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.oauth-modal-content::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background-color: #c4c4c4;
+    border-radius: 4px;
+}
+
+.oauth-modal-overlay.active .oauth-modal-content {
+    transform: translateY(0);
+}
+
+.oauth-modal-content h3 {
+    margin-top: 0; /* Возвращаем исходный margin */
+    margin-bottom: 16px;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.oauth-qrcode-container {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.oauth-qrcode-container canvas {
+    border: 1px solid #eee;
+    max-width: 100%;
+    height: auto;
+}
+
+.oauth-modal-separator {
+    margin: 24px 0;
+    color: #888;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.oauth-login-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.oauth-login-button:hover {
+    background-color: #0056b3;
+}
+
+/* --- Стили для десктопов --- */
+@media (min-width: 768px) {
+    .oauth-modal-overlay {
+        align-items: center;
+    }
+
+    .oauth-modal-content {
+        width: 90%;
+        max-width: 500px;
+        margin: 0 16px;
+        border-radius: 12px;
+        padding: 32px;
+        transform: scale(0.8);
+        transition: transform 0.3s ease;
+    }
+
+    .oauth-modal-content::before {
+        display: none;
+    }
+
+    .oauth-modal-overlay.active .oauth-modal-content {
+        transform: scale(1);
+    }
+}
+
+/* Лоадер */
+.oauth-loader {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 0;
+}
+.oauth-spinner {
+    width: 40px; height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: #007bff;
+    animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Контейнер для ошибки */
+.oauth-error-container {
+    text-align: center;
+    padding: 20px 0;
+    display: none; /* Изначально скрыт */
+}
+.oauth-error-message {
+    color: #d9534f;
+    margin-bottom: 16px;
+}
+.oauth-retry-button {
+    background-color: #f0ad4e;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.oauth-retry-button:hover {
+    background-color: #ec971f;
+}
+
+/* Таймер */
+.oauth-timer-container {
+    display: none; /* Изначально скрыт */
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
