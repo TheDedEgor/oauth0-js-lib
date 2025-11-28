@@ -86,7 +86,7 @@ export class QRModal {
 
         const updateTimer = () => {
             const now = new Date().getTime();
-            const targetTime = new Date(validUntil + 'Z').getTime();
+            const targetTime = new Date(validUntil).getTime();
             const difference = targetTime - now;
 
             if (difference > 0) {
