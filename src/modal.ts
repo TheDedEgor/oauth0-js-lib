@@ -1,6 +1,6 @@
 import * as QRCode from 'qrcode';
 import './style.css';
-import {type AuthSession, type AuthSessionTime, createAuthEvent, createAuthSession} from "@/authApi.js";
+import {type AuthSession, type AuthSessionTime, createAuthEvent, createAuthSession} from "./authApi.js";
 
 export class QRModal {
     private overlay: HTMLElement | null = null;
