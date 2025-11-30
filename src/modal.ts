@@ -2,12 +2,9 @@ import * as QRCode from 'qrcode';
 import './style.css';
 import {type AuthSession, createAuthEvent, createAuthSession, type AuthSessionTime} from "./main.js";
 
-export type ErrorCallback = (error: any) => void;
-
 export class QRModal {
     private overlay: HTMLElement | null = null;
     private isOpen: boolean = false;
-    private errorCallback: ErrorCallback | null = null;
     private authEvent: EventSource | null = null;
 
     // Элементы для управления состояниями
@@ -21,6 +18,11 @@ export class QRModal {
 
     // Таймер
     private timerInterval: number | null = null;
+
+    // Промис
+    private resolvePromise: ((value: void | PromiseLike<void>) => void) | null = null;
+    private rejectPromise: ((reason?: any) => void) | null = null;
+    private currentPromise: Promise<void> | null = null;
 
     private createElement(tag: string, className: string, textContent?: string): HTMLElement {
         const el = document.createElement(tag);
@@ -64,7 +66,12 @@ export class QRModal {
 
         this.overlay.appendChild(this.contentContainer);
         this.overlay.addEventListener('click', (event) => {
-            if (event.target === this.overlay) this.close();
+            if (event.target === this.overlay) {
+                this.close();
+                if (this.errorContainer?.style.display == 'block') {
+                    this.rejectPromise!();
+                }
+            }
         });
         document.body.appendChild(this.overlay);
     }
@@ -124,7 +131,10 @@ export class QRModal {
         this.generateQR(this.qrContainer!, link);
         this.loginButton!.onclick = () => window.open(link);
 
-        this.authEvent = createAuthEvent(() => this.close(), (err: any) => this.renderErrorState(err));
+        this.authEvent = createAuthEvent(() => {
+            this.close()
+            this.resolvePromise!();
+        }, (err: any) => this.renderErrorState(err));
 
         if (session.validUntil) {
             this.timerContainer!.style.display = 'block';
@@ -167,11 +177,18 @@ export class QRModal {
     // Добавим свойство для хранения данных запроса
     private requestData: AuthSessionTime | null = null;
 
-    public async show(requestData: AuthSessionTime, onError?: ErrorCallback): Promise<void> {
-        if (this.isOpen) return; // Если окно уже открыто, ничего не делаем
+    public async show(requestData: AuthSessionTime): Promise<void> {
+        if (this.isOpen) {
+            // Если уже открыт, возвращаем существующий promise
+            return this.currentPromise!;
+        }
 
         this.requestData = requestData;
-        this.errorCallback = onError || null;
+
+        this.currentPromise = new Promise<void>((resolve, reject) => {
+            this.resolvePromise = resolve;
+            this.rejectPromise = reject;
+        });
 
         if (!this.overlay) this.createModal();
 
@@ -180,6 +197,8 @@ export class QRModal {
 
         // Запускаем процесс авторизации
         this.startAuthFlow();
+
+        return this.currentPromise;
     }
 
     private async startAuthFlow() {
@@ -191,7 +210,6 @@ export class QRModal {
             this.renderSuccessState(session);
         } catch (error) {
             this.renderErrorState(error);
-            if (this.errorCallback) this.errorCallback(error);
         }
     }
 

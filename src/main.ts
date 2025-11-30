@@ -26,8 +26,8 @@ const api = axios.create({
 
 const modalInstance = new QRModal();
 
-export function showQrLogin(sessionTime: AuthSessionTime = {}) {
-    modalInstance.show(sessionTime);
+export async function showQrLogin(sessionTime: AuthSessionTime = {}) {
+    return modalInstance.show(sessionTime);
 }
 
 export function closeQrLogin(): void {
