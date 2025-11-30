@@ -1,4 +1,4 @@
-import {getConfig} from "@/config.js";
+import {getConfig} from "./config.js";
 import axios from "axios";
 
 export interface AuthSessionTime {
