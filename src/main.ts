@@ -1,16 +1,8 @@
-import axios from "axios";
 import styles from './style.css?raw';
-import {getConfig} from "./config.js";
 import {QRModal} from "./modal.js";
-import type { AuthSessionTime } from "@/authApi.js";
+import type {AuthSessionTime} from "@/authApi.js";
 
 injectStyles();
-
-const config = getConfig();
-
-const api = axios.create({
-    baseURL: config.baseUrl,
-});
 
 const modalInstance = new QRModal();
 

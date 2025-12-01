@@ -127,7 +127,7 @@ export class QRModal {
         this.separator!.style.display = 'block';
         this.loginButton!.style.display = 'block';
 
-        const link = session.links[0]!.link;
+        const link = this.chooseLink(session);
         this.generateQR(this.qrContainer!, link);
         this.loginButton!.onclick = () => window.open(link);
 
@@ -142,6 +142,22 @@ export class QRModal {
         } else {
             this.timerContainer!.style.display = 'none';
         }
+    }
+
+    private chooseLink(session: AuthSession): string {
+        const links = session.links;
+        const webAppLink = links.find(item => item.type == 'WEB_APP');
+        if (webAppLink) {
+            return webAppLink.link;
+        }
+        const botLink = links.find(item => item.type == 'BOT');
+        if (botLink) {
+            return botLink.link;
+        }
+        if (links.length > 0) {
+            return links[0]!.link;
+        }
+        throw "Не удалось найти ссылку";
     }
 
     private renderErrorState(error: any) {
