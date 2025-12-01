@@ -6,7 +6,7 @@ export interface OauthConfig {
 }
 
 const defaultConfig: OauthConfig = {
-    baseUrl: "",
+    baseUrl: getDefaultBaseUrl(),
     createEndpoint: "/api/oauth0/create",
     authEventEndpoint: "/api/oauth0/auth-events",
     authConfirmEndpoint: "/api/oauth0/auth-confirm"
@@ -35,4 +35,14 @@ export function setConfig(newConfig: OauthConfig) {
 
 export function getConfig() {
     return currentConfig;
+}
+
+function getDefaultBaseUrl(): string {
+    if (typeof window !== "undefined" && window.location?.origin) {
+        return window.location.origin;
+    }
+    if (typeof globalThis !== "undefined" && (globalThis as any).location?.origin) {
+        return (globalThis as any).location.origin;
+    }
+    return "";
 }
