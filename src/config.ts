@@ -3,13 +3,15 @@ export interface OauthConfig {
     createEndpoint: string;
     authEventEndpoint: string;
     authConfirmEndpoint: string;
+    linkType: 'WEB_APP' | 'BOT'
 }
 
 const defaultConfig: OauthConfig = {
     baseUrl: getDefaultBaseUrl(),
     createEndpoint: "/api/oauth0/create",
     authEventEndpoint: "/api/oauth0/auth-events",
-    authConfirmEndpoint: "/api/oauth0/auth-confirm"
+    authConfirmEndpoint: "/api/oauth0/auth-confirm",
+    linkType: 'WEB_APP'
 };
 
 // Проверяем define-конфиг (для Vite/Webpack)

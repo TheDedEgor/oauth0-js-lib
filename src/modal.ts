@@ -1,6 +1,9 @@
 import * as QRCode from 'qrcode';
 import './style.css';
 import {type AuthSession, type AuthSessionTime, createAuthEvent, createAuthSession} from "./authApi.js";
+import {getConfig} from "@/config.js";
+
+const config = getConfig();
 
 export class QRModal {
     private overlay: HTMLElement | null = null;
@@ -147,11 +150,11 @@ export class QRModal {
     private chooseLink(session: AuthSession): string {
         const links = session.links;
         const webAppLink = links.find(item => item.type == 'WEB_APP');
-        if (webAppLink) {
+        if (webAppLink && config.linkType == 'WEB_APP') {
             return webAppLink.link;
         }
         const botLink = links.find(item => item.type == 'BOT');
-        if (botLink) {
+        if (botLink && config.linkType == 'BOT') {
             return botLink.link;
         }
         if (links.length > 0) {
