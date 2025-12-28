@@ -1,7 +1,7 @@
 import * as QRCode from 'qrcode';
 import './style.css';
 import {type AuthSession, type AuthSessionTime, createAuthEvent, createAuthSession} from "./authApi.js";
-import {getConfig} from "@/config.js";
+import {getConfig} from "./config.js";
 
 const config = getConfig();
 
