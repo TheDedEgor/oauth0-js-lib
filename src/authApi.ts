@@ -11,7 +11,7 @@ export interface AuthSession {
         type: string
     }[]
     sessionId: string
-    validUntil: string | null
+    validUntil: string
 }
 
 const config = getConfig();
@@ -21,33 +21,37 @@ const api = axios.create({
 });
 
 export async function createAuthSession(sessionTime: AuthSessionTime = {}) {
-    const response = await api.post<AuthSession>(config.createEndpoint, sessionTime, {
-        withCredentials: true
-    });
+    const response = await api.post<AuthSession>(config.createEndpoint, sessionTime);
     return response.data;
 }
 
-export function createAuthEvent(successCallback: Function = () => {}, errorCallback: Function = () => {}) {
-    const url = new URL(config.authEventEndpoint, config.baseUrl);
-    const eventSource = new EventSource(url, {
-        withCredentials: true
-    });
-    eventSource.addEventListener('auth-success', async (e) => {
-        try {
-            await api.post(config.authConfirmEndpoint, null, {
-                withCredentials: true
-            });
-            successCallback();
-        } catch (err) {
-            console.error(err);
-            errorCallback(err);
-        } finally {
-            eventSource.close();
+export async function auth(sessionId: string, validUntil: string, signal: AbortSignal) {
+    const controller = new AbortController();
+    const validUntilDate = new Date(validUntil).getTime();
+
+    signal.addEventListener('abort', () => controller.abort())
+
+    while (true) {
+        if (validUntilDate - Date.now() <= 0) {
+            throw new Error('Auth timeout');
         }
-    });
-    eventSource.onerror = (e) => {
-        console.error("EventSource failed:", e);
-        eventSource.close();
-    };
-    return eventSource;
+
+        const response = await api.post(config.authEndpoint, null, {
+            params: {
+                sessionId
+            },
+            withCredentials: true,
+            signal: controller.signal
+        });
+        // аутентификация успешна
+        if (response.status === 200) {
+            return;
+        }
+        // пользователь пока не вошел, отправляем еще раз запрос
+        if (response.status === 204) {
+            continue;
+        }
+        // Любой другой статус ошибка
+        throw new Error(`Auth failed: ${response.status}`);
+    }
 }

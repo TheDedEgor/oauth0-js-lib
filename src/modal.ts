@@ -1,6 +1,6 @@
 import * as QRCode from 'qrcode';
 import './style.css';
-import {type AuthSession, type AuthSessionTime, createAuthEvent, createAuthSession} from "./authApi.js";
+import {type AuthSession, type AuthSessionTime, auth, createAuthSession} from "./authApi.js";
 import {getConfig} from "./config.js";
 
 const config = getConfig();
@@ -8,7 +8,7 @@ const config = getConfig();
 export class QRModal {
     private overlay: HTMLElement | null = null;
     private isOpen: boolean = false;
-    private authEvent: EventSource | null = null;
+    private controller: AbortController | null = null;
 
     // Элементы для управления состояниями
     private contentContainer: HTMLElement | null = null;
@@ -134,10 +134,13 @@ export class QRModal {
         this.generateQR(this.qrContainer!, link);
         this.loginButton!.onclick = () => window.open(link);
 
-        this.authEvent = createAuthEvent(() => {
-            this.close()
+        const authPromise = auth(session.sessionId, session.validUntil, this.controller!.signal)
+        authPromise.then(() => {
+            this.close();
             this.resolvePromise!();
-        }, (err: any) => this.renderErrorState(err));
+        }).catch((err) => {
+            this.renderErrorState(err)
+        });
 
         if (session.validUntil) {
             this.timerContainer!.style.display = 'block';
@@ -202,6 +205,7 @@ export class QRModal {
             return this.currentPromise!;
         }
 
+        this.controller = new AbortController();
         this.requestData = requestData;
 
         this.currentPromise = new Promise<void>((resolve, reject) => {
@@ -235,9 +239,7 @@ export class QRModal {
     public close(): void {
         if (!this.isOpen || !this.overlay) return;
 
-        if (this.authEvent) {
-            this.authEvent.close();
-        }
+        this.controller?.abort();
 
         if (this.timerInterval) {
             clearInterval(this.timerInterval);

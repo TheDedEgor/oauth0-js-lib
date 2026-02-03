@@ -1,16 +1,14 @@
 export interface OauthConfig {
     baseUrl: string;
     createEndpoint: string;
-    authEventEndpoint: string;
-    authConfirmEndpoint: string;
+    authEndpoint: string;
     linkType: 'WEB_APP' | 'BOT'
 }
 
 const defaultConfig: OauthConfig = {
     baseUrl: getDefaultBaseUrl(),
     createEndpoint: "/api/oauth0/create",
-    authEventEndpoint: "/api/oauth0/auth-events",
-    authConfirmEndpoint: "/api/oauth0/auth-confirm",
+    authEndpoint: "/api/oauth0/auth",
     linkType: 'WEB_APP'
 };
 
